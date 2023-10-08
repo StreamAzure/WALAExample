@@ -8,6 +8,7 @@ import com.ibm.wala.ipa.callgraph.impl.Util;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
+import com.ibm.wala.types.ClassLoaderReference;
 import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.config.AnalysisScopeReader;
 
@@ -46,7 +47,7 @@ public class WALADemo {
                 new AnalysisCacheImpl(), cha, scope);
         callGraph = builder.makeCallGraph(options, null);
 
-//        printClassAndMethod();
+        printClassAndMethodInApplication();
 
         System.out.println(CallGraphStats.getStats(callGraph));
         findAllApplicationNode();
@@ -55,8 +56,11 @@ public class WALADemo {
                 + (System.currentTimeMillis() - start_time) + "ms");
     }
 
-    private void printClassAndMethod(){
+    private void printClassAndMethodInApplication(){
         for (IClass c : cha) {
+            // 判定
+            if(!Utils.isApplicationClass(c)) continue;
+
             String cname = c.getName().toString();
             System.out.println("Class:" + cname);
             for (IMethod m : c.getAllMethods()) {

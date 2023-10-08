@@ -15,6 +15,11 @@ public class Utils {
                 .equals(ClassLoaderReference.Application);
     }
 
+    public static boolean isApplicationClass(IClass cls){
+        return cls.getClassLoader().getReference()
+                .equals(ClassLoaderReference.Application);
+    }
+
     public static void exitWithErrorMessage(String message){
         System.err.println(message);
         System.exit(1);

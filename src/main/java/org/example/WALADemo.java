@@ -8,14 +8,17 @@ import com.ibm.wala.ipa.callgraph.impl.Util;
 import com.ibm.wala.ipa.cha.ClassHierarchy;
 import com.ibm.wala.ipa.cha.ClassHierarchyException;
 import com.ibm.wala.ipa.cha.ClassHierarchyFactory;
+import com.ibm.wala.util.collections.HashSetFactory;
 import com.ibm.wala.util.config.AnalysisScopeReader;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 public class WALADemo {
     private CallGraph callGraph = null;
     private boolean mainEntrypoints = true;
+    private ClassHierarchy cha;
 
     public static void main(String[] args) throws IOException,
             ClassHierarchyException, IllegalArgumentException,
@@ -30,7 +33,7 @@ public class WALADemo {
         System.out.println("start to make call graph");
         AnalysisScope scope = AnalysisScopeReader.makeJavaBinaryAnalysisScope(
                 "C:\\Me\\JavaProjects\\Example\\target\\classes\\org\\example", new File("Java60RegressionExclusions.txt"));
-        ClassHierarchy cha = ClassHierarchyFactory.make(scope);
+        cha = ClassHierarchyFactory.make(scope);
         Iterable<Entrypoint> entryPointIterator = null;
         if (mainEntrypoints) {
             entryPointIterator = Util.makeMainEntrypoints(scope, cha);
@@ -43,6 +46,16 @@ public class WALADemo {
                 new AnalysisCacheImpl(), cha, scope);
         callGraph = builder.makeCallGraph(options, null);
 
+//        printClassAndMethod();
+
+        System.out.println(CallGraphStats.getStats(callGraph));
+        findAllApplicationNode();
+//        System.out.println(CallGraphStats.collectMethods(callGraph));
+        System.out.println("Time spent ont building CHA and CG:"
+                + (System.currentTimeMillis() - start_time) + "ms");
+    }
+
+    private void printClassAndMethod(){
         for (IClass c : cha) {
             String cname = c.getName().toString();
             System.out.println("Class:" + cname);
@@ -52,10 +65,12 @@ public class WALADemo {
             }
             System.out.println();
         }
-
-        System.out.println(CallGraphStats.getStats(callGraph));
-//        System.out.println(CallGraphStats.collectMethods(callGraph));
-        System.out.println("Time spent ont building CHA and CG:"
-                + (System.currentTimeMillis() - start_time) + "ms");
+    }
+    private void findAllApplicationNode(){
+        for (CGNode node : callGraph) {
+            if (Utils.isApplicationNode(node)) {
+                System.out.println(node);
+            }
+        }
     }
 }
